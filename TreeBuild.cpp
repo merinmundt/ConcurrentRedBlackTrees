@@ -27,6 +27,7 @@ class TreeBuild{
         TreeBuild(){
             root.data = NULL;
         }
+        
 
 
     //Method to insert node in parameter into tree
@@ -38,7 +39,7 @@ class TreeBuild{
         }
         else{
             int num = node->data;        
-            
+            //percolating node down to its position
             if(data1 < num){
                 node->left = insertNode(node->left, data1); 
                 node->left->parent = node;
@@ -52,12 +53,24 @@ class TreeBuild{
         return node;
 
     }
+    //method to make sure the tree follows all Red Black Tree Properties
+    Node* refactorTree(Node *node, Node *node2){
+        Node *parent_ = NULL;
+        Node *grandparent = NULL;
+
+        //while there is still fixing to be done within the tree
+        while((node2->color != Black) && (node2 != node) && (node2->parent->color != Black)){
 
 
 
-    int main(char *file_ptr){
-        TreeBuild Tree;
-        
+        }
     }
 
+
+
 };
+
+int main(char *file_ptr){
+        TreeBuild Tree;
+        
+}
