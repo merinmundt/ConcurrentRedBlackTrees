@@ -51,7 +51,23 @@ class TreeBuild{
 
     //method to delete a node
     Node* deleteNote(Node *node){
-
+        Node *delNode = searchNode(node);\
+        if(delNode->left == NULL && delNode->right == NULL){
+            if (delNode->parent->right == delNode)
+            {
+                delNode->parent->color = Black;
+                delNode->parent->right = NULL;
+            }
+            else{
+                delNode->parent->color = Black;
+                delNode->parent->left = NULL;
+            }  
+        }
+        else if (delNode->left == NULL || delNode->right == NULL)
+        {
+            
+        }
+        
     }
 
     //method to switch a node to the left to keep Red Back properties
@@ -115,7 +131,7 @@ class TreeBuild{
                 node->right->parent = node;
             }
         }
-        
+
         //might not be right here
         refactorTree(root, node);
         return node;
