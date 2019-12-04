@@ -10,7 +10,7 @@ struct Node
     bool color;
     Node *left, *right, *parent;
 
-    Node(int data){
+    Node(){
         this->data = data;
         this->color = Red;
         right = NULL;
@@ -25,16 +25,31 @@ class TreeBuild{
     public:
         //This is the constructor
         TreeBuild(){
-            root = NULL;
+            root.data = NULL;
         }
 
+
     //Method to insert node in parameter into tree
-    void insertNode(Node *node){
-        if(root == NULL){
-            root = node;
+    Node* insertNode(Node *node, int data1){
+        if(root.data == NULL){
+            root = *node;
+            root.color = Black;
             return;
         }
+        else{
+            int num = node->data;        
+            
+            if(data1 < num){
+                node->left = insertNode(node->left, data1); 
+                node->left->parent = node;
+            }
+            else if(data1 > num){
+                node->right = insertNode(node->right, data1);
+                node->right->parent = node;
+            }
+        }
         
+        return node;
 
     }
 
