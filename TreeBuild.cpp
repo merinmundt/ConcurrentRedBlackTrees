@@ -1,4 +1,8 @@
 #include <pthread.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
 //#include <bits/stdc++.h> 
 
 using namespace std;
@@ -30,43 +34,56 @@ class TreeBuild{
         }
 
     //method to search for a node
-    Node* searchNode(Node *node){
+    bool searchNode(int data){
+    
         Node *curr = root;
-        if(curr == NULL){
-            return;
-        }
-        while(curr->data != node->data){
-            //finding where prospected node is
-            if(curr->data < node->data)
-            {
+        while (curr != NULL) {
+            if (curr->data == data) {
+                return true;
+            }
+            if (curr->data < data) {
                 curr = curr->right;
             }
-            else
-            {
+            if (curr->data > data){
                 curr = curr->left;
             }
+            
         }
-        return curr;
+        return false;
+    }
+
+    //finding the node to replace the node to be deleted
+    Node* replaceNode(Node *rep){
+        //if node to be deleted has 2 children
+        if(rep->left != NULL && rep->right != NULL){
+            Node* temp;
+            temp = rep->right;
+            while(temp->left != NULL){
+                temp = temp->left;
+            }
+            rep = temp;
+            return rep;
+        }
+        //if node has 2 leaves(NIL) for children
+        if(rep->left == NULL && rep->right == NULL){
+            return NULL;
+        }
+
+        //if node only has one child, and one leaf
+        if(rep->left != NULL){
+            return rep->left;
+        }
+        else{
+            return rep->right;
+        }
     }
 
     //method to delete a node
-    Node* deleteNote(Node *node){
-        Node *delNode = searchNode(node);\
-        if(delNode->left == NULL && delNode->right == NULL){
-            if (delNode->parent->right == delNode)
-            {
-                delNode->parent->color = Black;
-                delNode->parent->right = NULL;
-            }
-            else{
-                delNode->parent->color = Black;
-                delNode->parent->left = NULL;
-            }  
-        }
-        else if (delNode->left == NULL || delNode->right == NULL)
-        {
-            
-        }
+    Node* deleteNote(int data){
+       Node *delNode;
+       delNode->data = data;
+       
+       
         
     }
 
@@ -115,20 +132,31 @@ class TreeBuild{
     }
 
     //Method to insert Node data1 in parameter into tree
-    Node* insertNode(Node *node, Node *data1){
+    Node* insertNode(int data1){
+        Node *node = root;
+        Node *newNode;
+        newNode->data = data1;
         if(node == NULL){
-            return data1;
+            return newNode;
         }
         else{
-            int num = node->data;        
-            //percolating node down to its position
-            if(data1->data < num){
-                node->left = insertNode(node->left, data1); 
-                node->left->parent = node;
-            }
-            else if(data1->data > num){
-                node->right = insertNode(node->right, data1);
-                node->right->parent = node;
+            int num = node->data;  
+            bool insert = false; 
+            while(!insert){     
+                //percolating node down to its position
+                if(data1 < num){
+                    node = node->left;
+                    if(node == NULL){
+                        node->parent->left = newNode;
+                    }
+                }
+                else if(data1 > num){
+                    node = node->right;
+                    if(node == NULL){
+                        node->parent->right = newNode;
+                    }
+                }
+                    
             }
         }
 
@@ -213,11 +241,21 @@ class TreeBuild{
         node->color = Black;
     }
 
-
-
+    void parseInput(string file){
+        std::vector<string> commands;
+        string line;
+        ifstream inputFile(file);
+        if(inputFile.is_open){
+            while(!EOF){
+                getline(inputFile, line);
+                commands.push_back(line);
+            }
+        }
+    }
 };
 
 int main(char *file_ptr){
         TreeBuild Tree;
+        
         
 }
