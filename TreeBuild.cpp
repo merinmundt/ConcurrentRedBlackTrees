@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <bits/stdc++.h> 
 
 using namespace std;
 enum COLOR {Red, Black};
@@ -117,10 +118,21 @@ class TreeBuild{
                         node2 = grandparent;
                     }
 
-                    
-                }
-                else{
-                        
+                    else{
+                        //first case if uncle is not red
+                        if(node2 == parent_->right){
+                            LSwitch(node, parent_);
+                            node2 = parent_;
+                            parent_= node2->parent;
+                        } 
+
+                        //second case
+                        if(node2 == parent_->left){
+                            RSwitch(node, grandparent);
+                            swap(parent_->color,grandparent->color);
+                            node2 = parent_;
+                        }
+                    }
                 }
         }
     }
