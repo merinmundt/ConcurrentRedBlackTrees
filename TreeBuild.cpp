@@ -22,14 +22,39 @@ struct Node
 
 class TreeBuild{    
     private:
-        Node root;
+        Node *root;
     public:
         //This is the constructor
         TreeBuild(){
-            root.data = NULL;
+            root = NULL;
         }
-        
 
+    //method to search for a node
+    Node* searchNode(Node *node){
+        Node *curr = root;
+        if(curr == NULL){
+            return;
+        }
+        while(curr->data != node->data){
+            //finding where prospected node is
+            if(curr->data < node->data)
+            {
+                curr = curr->right;
+            }
+            else
+            {
+                curr = curr->left;
+            }
+        }
+        return curr;
+    }
+
+    //method to delete a node
+    Node* deleteNote(Node *node){
+
+    }
+
+    //method to switch a node to the left to keep Red Back properties
     void LSwitch(Node *node, Node *node1){
             Node *right = node1->right;
             node1->right = right->left;
@@ -51,6 +76,7 @@ class TreeBuild{
             node1->parent = right;
     }
 
+    //method to switch a node to the right to keep Red Back properties
     void RSwitch(Node *node, Node *node1){
             Node *left = node1->left;
             node1->left = left->right;
@@ -72,7 +98,7 @@ class TreeBuild{
             node1->parent = left;
     }
 
-    //Method to insert node in parameter into tree
+    //Method to insert Node data1 in parameter into tree
     Node* insertNode(Node *node, Node *data1){
         if(node == NULL){
             return data1;
@@ -90,6 +116,8 @@ class TreeBuild{
             }
         }
         
+        //might not be right here
+        refactorTree(root, node);
         return node;
 
     }
