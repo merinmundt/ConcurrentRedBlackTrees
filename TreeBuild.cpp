@@ -1,5 +1,5 @@
 #include <pthread.h>
-#include <bits/stdc++.h> 
+//#include <bits/stdc++.h> 
 
 using namespace std;
 enum COLOR {Red, Black};
@@ -39,7 +39,7 @@ class TreeBuild{
             //moving up
             right->parent = node1->parent;
             if(node1->parent == NULL){
-                root = right;
+                node = right;
             }
             else if(node1->parent->left == node1){
                 node1->parent->left = right;
@@ -60,7 +60,7 @@ class TreeBuild{
             //moving up
             left->parent = node1->parent;
             if(node1->parent == NULL){
-                root = left;
+                node = left;
             }
             else if(node1->parent->right == node1){
                 node1->parent->left = left;
@@ -73,20 +73,18 @@ class TreeBuild{
     }
 
     //Method to insert node in parameter into tree
-    Node* insertNode(Node *node, int data1){
-        if(root.data == NULL){
-            root = *node;
-            root.color = Black;
-            return;
+    Node* insertNode(Node *node, Node *data1){
+        if(node == NULL){
+            return data1;
         }
         else{
             int num = node->data;        
             //percolating node down to its position
-            if(data1 < num){
+            if(data1->data < num){
                 node->left = insertNode(node->left, data1); 
                 node->left->parent = node;
             }
-            else if(data1 > num){
+            else if(data1->data > num){
                 node->right = insertNode(node->right, data1);
                 node->right->parent = node;
             }
@@ -127,14 +125,48 @@ class TreeBuild{
                         } 
 
                         //second case
-                        if(node2 == parent_->left){
+                        else if(node2 == parent_->left){
                             RSwitch(node, grandparent);
-                            swap(parent_->color,grandparent->color);
+                            Node *Dummy;
+                            Dummy->color = parent_->color;
+                            parent_->color = grandparent->color;
+                            grandparent->color = Dummy->color;
                             node2 = parent_;
                         }
                     }
                 }
+                //When the parent of node2 is in the right position of it's parent
+                else{
+                    Node *node4 = grandparent->left;
+
+                    //node 4 is red
+                    if(node4->color == Red && node4 != NULL){
+                        node4->color = Black;
+                        parent_->color = Black;
+                        grandparent->color = Red;
+                        node2 = grandparent;
+                    }
+                    //node 4 is not red
+                    else{
+                        //first case if node 2 is on the right of its parent
+                        if(node2 == parent_->right){
+                            LSwitch(node, grandparent);
+                            Node *Dummy;
+                            Dummy->color = parent_->color;
+                            parent_->color = grandparent->color;
+                            grandparent->color = Dummy->color;
+                            node2 = parent_;
+                        }
+                        else if(node2 = parent_->left){
+                            RSwitch(node, parent_);
+                            node2 = parent_;
+                            parent_ = node2->parent;
+                        }
+                    }
+
+                }
         }
+        node->color = Black;
     }
 
 
