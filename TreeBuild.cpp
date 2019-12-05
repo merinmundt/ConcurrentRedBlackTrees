@@ -82,9 +82,48 @@ class TreeBuild{
     Node* deleteNote(int data){
        Node *delNode;
        delNode->data = data;
+       Node *parent_ = delNode->parent;
+       Node *u = replaceNode(delNode);
        
+       //bool to keep track if both the node to delete and the replacement 
+       bool bothblack;
+       bothblack = ((u == NULL || u->color == Black) && delNode->color == Black);
        
-        
+       //if v is a leaf
+       if (u == NULL){
+           if (delNode == root){
+               root = NULL;
+           }
+           if(bothblack){
+               //TODO
+           }
+           else{
+                Node *brother;
+                if(delNode->parent->left == delNode){
+                    brother = delNode->parent->right;
+                }
+                else{
+                    brother = delNode->parent->left;
+                }
+                if(brother != NULL){
+                    brother->color= Red;
+                }
+           
+                if(delNode->parent->right == delNode){
+                    delNode->parent->right = NULL;
+                }
+                else{
+                    delNode->parent->left = NULL;
+                }
+           }
+           delete delNode;
+           return;
+       }
+       
+       if(delNode->left == NULL || delNode->right == NULL){
+           
+       }
+
     }
 
     //method to switch a node to the left to keep Red Back properties
