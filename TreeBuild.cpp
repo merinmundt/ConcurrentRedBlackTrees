@@ -77,82 +77,132 @@ class TreeBuild{
             return rep->right;
         }
     }
-
-    //method to delete a node
-    Node* deleteNode(int data){
-       Node *delNode;
-       delNode->data = data;
-       //Node *parent_ = delNode->parent;
-       Node *replacement = replaceNode(delNode);
-       
-       //bool to keep track if both the node to delete and the replacement 
-       bool bothblack;
-       bothblack = ((replacement == NULL || replacement->color == Black) && delNode->color == Black);
-       
-       //if delNode is a leaf
-       if (replacement == NULL){
-           if (delNode == root){
-               root = NULL;
-           }
-           if(bothblack){
-               //TODO
-           }
-           else{
-                Node *brother;
-                if(delNode->parent->left == delNode){
-                    brother = delNode->parent->right;
+    void fixDelete(Node *x){
+        Node *temp;
+        while((x != root) && (x->color = Black)){
+            if(x == x->parent->left){
+                temp = x->parent->right;
+                if(temp->color == Red){
+                    temp->color = Black;
+                    x->parent->color = Red;
+                    LSwitch(x->parent);
+                    temp = x->parent->right;
+                }
+                if(temp->left->color == Black && temp->right->color == Black){
+                    temp->color = Red;
+                    x = x->parent;
+                }
+                if(temp->right->color == Black){
+                    temp->left->color = Black;
+                    temp->color = Red;
+                    RSwitch(temp);
+                    temp = x->parent->right;
                 }
                 else{
-                    brother = delNode->parent->left;
-                }
-                if(brother != NULL){
-                    brother->color= Red;
-                }
-           
-                if(delNode->parent->right == delNode){
-                    delNode->parent->right = NULL;
-                }
-                else{
-                    delNode->parent->left = NULL;
-                }
-           }
-           delete delNode;
-           return;
-       }
-       
-       if(delNode->left == NULL || delNode->right == NULL){
-            if(delNode == root){
-                root = replacement;
-                delete delNode;
-            }   
-            else{
-                if(delNode->parent->left == delNode){
-                    delNode->parent->left = replacement;
-                }
-                else{
-                    delNode->parent->right = replacement;
-                }
-                replacement->parent = delNode->parent;
-                delete delNode;
-
-                if(bothblack){
-                    //TODO
-                }
-                else{
-                    replacement->color = Black;
+                    temp->color = x->parent->color;
+                    x->parent->color = Black;
+                    temp->right->color = Black;
+                    LSwitch(x->parent);
+                    x = root;
                 }
             }
-            return;
-       }
+            else{
+                temp = x->parent->left;
+                if(temp->color == Red){
+                    temp->color = Black;
+                    x->parent->color = Red;
+                    RSwitch(x->parent);
+                    temp = x->parent->left;
+                }
+                if(temp->right->color == Black && temp->left->color == Black){
+                    temp->color = Red;
+                    x = x->parent;
+                }
+                if(temp->left->color == Black){
+                    temp->right->color = Black;
+                    temp->color = Red;
+                    LSwitch(temp);
+                    temp = x->parent->left;
+                }
+                else{
+                    temp->color = x->parent->color;
+                    x->parent->color = Black;
+                    temp->left->color = Black;
+                    RSwitch(x->parent);
+                    x = root;
+                }
+            }
+        }
 
-        int temp = replacement->data;
-        replacement->data = delNode->data;
-        delNode->data = temp;
-        deleteNode(delNode->data);
+        x->color = Black;
     }
 
+    Node* minimum(Node *x){
+          while(x != NULL){
+              x = x->left;
+          }     
+          return x;
+    }
+
+    void Transplant(Node *x, Node *y){
+        if(x->parent == NULL){
+            root = y;
+        }
+        else if (x == x->parent->left){
+            x->parent->left = y;
+        }
+        else{
+            x->parent->right = y;
+        }
+        if(y != NULL){
+            y->parent = x->parent;    
+        }
+    }
+
+    void deleteNode(int data){
+        Node *delNode;
+        Node *dummy;
+        delNode->data = data;
+        Node *y = delNode;
+        dummy->color = y->color;
+        Node *x;
+
+
+        if(delNode->left == NULL){
+            x = delNode->right;
+            Transplant(delNode,delNode->right);
+        }
+        else if(delNode->right == NULL){
+            x = delNode->left;
+            Transplant(delNode,delNode->left);
+        }
+        else{
+            y = minimum(delNode->right);
+            dummy->color = y->color;
+            x = y->right;
+            if(y->parent == delNode){
+                x->parent = y;
+            }
+            else{
+                Transplant(y, y->right);
+                y->right = delNode->right;
+                y->right->parent = y;
+            }
+            Transplant(delNode, y);
+            y->left = delNode->left;
+            y->left->parent = y;
+            y->color = delNode->color;
+
+        }
+        if(dummy->color == Black){
+            fixDelete(x);
+        }
+    }
+
+
     //method to switch a node to the left to keep Red Back properties
-    void LSwitch(Node *node, Node *node1){
+    void LSwitch(Node *node1){
+            Node *node = root;
             Node *right = node1->right;
             node1->right = right->left;
             if(node1->right != NULL){
@@ -174,7 +224,8 @@ class TreeBuild{
     }
 
     //method to switch a node to the right to keep Red Back properties
-    void RSwitch(Node *node, Node *node1){
+    void RSwitch(Node *node1){
+            Node *node = root;
             Node *left = node1->left;
             node1->left = left->right;
             if(node1->left != NULL){
@@ -225,12 +276,13 @@ class TreeBuild{
         }
 
         //might not be right here
-        refactorTree(root, node);
+        refactorTree(node);
         return node;
 
     }
     //method to make sure the tree follows all Red Black Tree Properties
-    Node* refactorTree(Node *node, Node *node2){
+    Node* refactorTree(Node *node2){
+        Node *node = root;
         Node *parent_ = NULL;
         Node *grandparent = NULL;
 
@@ -255,14 +307,14 @@ class TreeBuild{
                     else{
                         //first case if uncle is not red
                         if(node2 == parent_->right){
-                            LSwitch(node, parent_);
+                            LSwitch(parent_);
                             node2 = parent_;
                             parent_= node2->parent;
                         } 
 
                         //second case
                         else if(node2 == parent_->left){
-                            RSwitch(node, grandparent);
+                            RSwitch(grandparent);
                             Node *Dummy;
                             Dummy->color = parent_->color;
                             parent_->color = grandparent->color;
@@ -286,7 +338,7 @@ class TreeBuild{
                     else{
                         //first case if node 2 is on the right of its parent
                         if(node2 == parent_->right){
-                            LSwitch(node, grandparent);
+                            LSwitch(grandparent);
                             Node *Dummy;
                             Dummy->color = parent_->color;
                             parent_->color = grandparent->color;
@@ -294,7 +346,7 @@ class TreeBuild{
                             node2 = parent_;
                         }
                         else if(node2 = parent_->left){
-                            RSwitch(node, parent_);
+                            RSwitch(parent_);
                             node2 = parent_;
                             parent_ = node2->parent;
                         }
