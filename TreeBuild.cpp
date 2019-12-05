@@ -79,18 +79,18 @@ class TreeBuild{
     }
 
     //method to delete a node
-    Node* deleteNote(int data){
+    Node* deleteNode(int data){
        Node *delNode;
        delNode->data = data;
-       Node *parent_ = delNode->parent;
-       Node *u = replaceNode(delNode);
+       //Node *parent_ = delNode->parent;
+       Node *replacement = replaceNode(delNode);
        
        //bool to keep track if both the node to delete and the replacement 
        bool bothblack;
-       bothblack = ((u == NULL || u->color == Black) && delNode->color == Black);
+       bothblack = ((replacement == NULL || replacement->color == Black) && delNode->color == Black);
        
-       //if v is a leaf
-       if (u == NULL){
+       //if delNode is a leaf
+       if (replacement == NULL){
            if (delNode == root){
                root = NULL;
            }
@@ -121,9 +121,34 @@ class TreeBuild{
        }
        
        if(delNode->left == NULL || delNode->right == NULL){
-           
+            if(delNode == root){
+                root = replacement;
+                delete delNode;
+            }   
+            else{
+                if(delNode->parent->left == delNode){
+                    delNode->parent->left = replacement;
+                }
+                else{
+                    delNode->parent->right = replacement;
+                }
+                replacement->parent = delNode->parent;
+                delete delNode;
+
+                if(bothblack){
+                    //TODO
+                }
+                else{
+                    replacement->color = Black;
+                }
+            }
+            return;
        }
 
+        int temp = replacement->data;
+        replacement->data = delNode->data;
+        delNode->data = temp;
+        deleteNode(delNode->data);
     }
 
     //method to switch a node to the left to keep Red Back properties
@@ -295,6 +320,5 @@ class TreeBuild{
 
 int main(char *file_ptr){
         TreeBuild Tree;
-        
         
 }
