@@ -281,7 +281,7 @@ class TreeBuild{
 
     }
     //method to make sure the tree follows all Red Black Tree Properties
-    Node* refactorTree(Node *node2){
+    void refactorTree(Node *node2){
         Node *node = root;
         Node *parent_ = NULL;
         Node *grandparent = NULL;
@@ -345,7 +345,7 @@ class TreeBuild{
                             grandparent->color = Dummy->color;
                             node2 = parent_;
                         }
-                        else if(node2 = parent_->left){
+                        else if(node2 == parent_->left){
                             RSwitch(parent_);
                             node2 = parent_;
                             parent_ = node2->parent;
@@ -358,19 +358,26 @@ class TreeBuild{
     }
 
     void parseInput(string file){
-        std::vector<string> commands;
-        string line;
-        ifstream inputFile(file);
-        if(inputFile.is_open){
-            while(!EOF){
-                getline(inputFile, line);
-                commands.push_back(line);
-            }
-        }
+        
+        // std::vector<string> commands;
+        // string line;
+        // ifstream inputFile(file);
+        // if(inputFile.is_open()){
+            // while(!EOF){
+            //     getline(inputFile, line);
+            //     //std::cout << line << ' ';
+            //     commands.push_back(line);
+            // }
+        //}
+        // for(int i = 0; i < commands.size(); i++){
+        //     std::cout << commands[i] << ' ';
+        // }
     }
 };
 
-int main(char *file_ptr){
+int main(int i){
         TreeBuild Tree;
+        Tree.parseInput("Hello\0");
         Tree.insertNode(10);
+        return 0;
 }
