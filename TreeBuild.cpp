@@ -372,5 +372,5 @@ class TreeBuild{
 
 int main(char *file_ptr){
         TreeBuild Tree;
-        
+        Tree.insertNode(10);
 }
