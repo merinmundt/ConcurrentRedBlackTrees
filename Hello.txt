@@ -1,12 +1,6 @@
-insertNode(5);
-insertNode(10);
-insertNode(16);
-insertNode(2);
-insertNode(4);
-insertNode(21);
-insertNode(1);
-insertNode(11);
-searchNode(4);
-searchNode(12);
-deleteNode(16);
-deleteNode(1);
+3b, 4b, 5b, 6r, 7r, 8r
+
+Thread1
+thread2
+thread3
+

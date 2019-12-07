@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 //#include <bits/stdc++.h> 
@@ -437,8 +438,20 @@ vector<string> parseInput(string file){
         }
         inputFile.close();
     }
+    std:;vector<string> sepComma;
+    string token;
+    char delimeter = ',';
+    std::istringstream tokenstring;
     for(int i = 0; i < commands.size(); i++){
         std::cout << commands[i] << '\n';
+        std::istringstream tokenstring(commands[i]);
+        while(std::getline(tokenstring, token, delimeter)){
+              sepComma.push_back(token);  
+        }
+
+    }
+    for(int j = 0; j < sepComma.size(); j++){
+        std::cout << sepComma[j] << '\n';
     }
     return commands;
 }
