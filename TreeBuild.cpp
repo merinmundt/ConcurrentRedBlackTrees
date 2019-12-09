@@ -4,10 +4,14 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <thread>
+#include <queue>
 //#include <bits/stdc++.h> 
 
 using namespace std;
 enum COLOR {Red, Black};
+const std::string WHITESPACE = " \n\r\t\f\v";
+queue <string> commandsQueue;
 
 //initializing the node struct
 struct Node
@@ -216,21 +220,6 @@ class TreeBuild{
             x = delNode->left;
             Transplant(delNode,delNode->left);
         }
-        // else if(delNode->right == NIL && delNode->left == NIL){
-        //     printf("her\n");
-        //     std::cout << delNode->data << "\n";
-        //     if(delNode->parent->left == delNode){
-                
-        //         printf("ok");
-        //         delNode->parent->left = NULL;
-        //     }
-        //     else{
-        //         printf("idk\n");
-        //         delNode->parent->right = NULL;
-        //     }
-        //     //delNode = NULL;
-            
-        //}
         else{
             printf("mitch\n");
             y = minimum(delNode->right);
@@ -307,6 +296,8 @@ class TreeBuild{
     //Method to insert Node data1 in parameter into tree
     void insertNode(int data1){
         printf("in here\n");
+        //data1 = data1 - 48;
+        std::cout << data1 << "\n";
         Node *node = root;
         Node *y = NIL;
         Node *newNode = new Node(data1);
@@ -337,8 +328,8 @@ class TreeBuild{
         newNode->right = NIL;
         newNode->color = Red;
 
-        std::cout << root->data << "\n";
-        std::cout << root->color << "\n";
+        //std::cout << root->data << "\n";
+        //std::cout << root->color << "\n";
         refactorTree(newNode);
         
 
@@ -422,7 +413,7 @@ class TreeBuild{
 
 };
 
-
+//method to parse the input file
 vector<string> parseInput(string file){
     
     std::vector<string> commands;
@@ -432,48 +423,136 @@ vector<string> parseInput(string file){
     if(inputFile.is_open()){
         //printf("herr2\n");
         while(!inputFile.eof()){
-            printf("here3\n");
+            //printf("here3\n");
             getline(inputFile, line);
             commands.push_back(line);
         }
         inputFile.close();
     }
+
     std:;vector<string> sepComma;
     string token;
+    string s;
     char delimeter = ',';
+    char delimeter2 = '||';
     std::istringstream tokenstring;
+    std::istringstream spaces;
+    int count = 0;
     for(int i = 0; i < commands.size(); i++){
-        std::cout << commands[i] << '\n';
+        //std::cout << commands[i] << '\n';
         std::istringstream tokenstring(commands[i]);
-        while(std::getline(tokenstring, token, delimeter)){
-              sepComma.push_back(token);  
+        std::istringstream spaces(commands[i]);
+        if(count == 0){
+            while(std::getline(tokenstring, token, delimeter)){
+                token.erase(remove(token.begin(), token.end(), ' '), token.end());
+                sepComma.push_back(token);
+            }
+            if(commands[i+1].empty()){
+                count++;
+                //printf("true\n");
+                sepComma.push_back("\n");
+            }
+        }
+        else if(count == 1){
+            while(std::getline(tokenstring, token, delimeter)){
+                sepComma.push_back(token);
+            }
+            if(commands[i+1].empty()){
+                count++;
+                //printf("true\n");
+                sepComma.push_back("\n");
+            }
+        }
+        else if(count == 2){
+            while(std::getline(tokenstring, token, delimeter2)){
+                sepComma.push_back(token);
+            }
+        }
+        
+
+    }
+    // for(int j = 0; j < sepComma.size(); j++){
+    //     std::cout << sepComma[j] << '\n';
+    // }
+    return sepComma;
+}
+//method to run the instructions and the threads
+void runInstruction(TreeBuild Tree, string s){
+        std::cout << s << "\n";
+        char num;
+        char col;
+        pthread_t threads;
+        vector<string> threadandComs;
+        std::string temp;
+        char del = ',';
+        string split;
+        //printf("here\n");
+        if(s.at(s.length() -1) == 'b' || s.at(s.length() -1) == 'r' || s.at(s.length() -1) == 'f'){
+            if(s.at(s.length() -1) == 'f'){
+                return;
+            }
+            col = s.at(s.length()-1);
+            temp = s.substr(0, s.length()-1);
+            //num = stoi(temp);
+            Tree.insertNode(stoi(temp));
+        } 
+        else if(s.find(',') != std::string::npos){
+            printf("trueeee\n");
+            std::istringstream ss(s);
+            while(std::getline(ss, split, del)){
+                commandsQueue.push;
+            }
+
+            
+        }
+        else{
+            //pthread_create(&)
+           
+            
+        }
+        for(int i = 0; i < threads.size(); i++){
+            pthread_create(&threads[i], NULL, concurrentThread, NULL);
         }
 
-    }
-    for(int j = 0; j < sepComma.size(); j++){
-        std::cout << sepComma[j] << '\n';
-    }
-    return commands;
-}
 
+}
+void *concurrentThread(void *arg){
+        int readers;
+        while(!commandsQueue.empty){
+            string s = commandsQueue.pop;
+            if(s.at(0) == 't'){
+                s = commandsQueue.pop;
+            }
+            if(s.at(0 == 's')){
+                string num = s.substr(s.length()-3, s.length()-2);
+                
+            }
+        }
+
+
+
+
+}
 
 
 int main(int i){
         TreeBuild Tree;
         vector<string> commands;
+        pthread_mutex_t m;
+        pthread_mutex_init(m, NULL);
         commands = parseInput("Hello.txt");
         for(int i = 0; i < commands.size(); i++){
-            string instruction =commands[i];
+            string instruction = commands[i];
+            std::cout << instruction << "\n";
+            if(!(commands[i].find(',') != std::string::npos) || commands[i].at(commands[i].length() -1) == ')'){
+
+            }
+            else{
+                runInstruction(Tree, instruction);
+            }
+            
         }   
-        // Tree.insertNode(10);
-        // Tree.insertNode(13);
-        // Tree.insertNode(5);
-        // Tree.insertNode(8);
-        // Tree.insertNode(19);
-        // Tree.searchNode(5);
-        // printf("got here\n");
-        // Tree.deleteNode(13);
-        // Tree.searchNode(13);
+        
         
         return 0;
 }
