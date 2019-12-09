@@ -6,12 +6,17 @@
 #include <vector>
 #include <thread>
 #include <queue>
+#include <semaphore.h>
 //#include <bits/stdc++.h> 
 
 using namespace std;
 enum COLOR {Red, Black};
 const std::string WHITESPACE = " \n\r\t\f\v";
-queue <string> commandsQueue;
+queue <string> readQueue;
+queue<string> writeQueue;
+sem_t mute;
+sem_t wrtieLock;
+TreeBuild Tree;
 
 //initializing the node struct
 struct Node
@@ -499,37 +504,54 @@ void runInstruction(TreeBuild Tree, string s){
         else if(s.find(',') != std::string::npos){
             printf("trueeee\n");
             std::istringstream ss(s);
-            while(std::getline(ss, split, del)){
-                commandsQueue.push;
+            if(s.at(s.length()-10)== 's'){
+                while(std::getline(ss, split, del)){
+                readQueue.push;
+                }
+            }
+            else{
+               while(std::getline(ss, split, del)){
+                 writeQueue.push;
+                } 
             }
 
             
         }
-        else{
-            //pthread_create(&)
-           
             
-        }
-        for(int i = 0; i < threads.size(); i++){
-            pthread_create(&threads[i], NULL, concurrentThread, NULL);
+        for(int i = 0; i < readQueue.size(); i++){
+            //pthread_create(&threads[i], NULL, concurrentThread, Tree);
         }
 
 
 }
+//method to run read proccess
 void *concurrentThread(void *arg){
-        int readers;
-        while(!commandsQueue.empty){
-            string s = commandsQueue.pop;
-            if(s.at(0) == 't'){
-                s = commandsQueue.pop;
+        int read;
+        while(!readQueue.empty){
+            sem_wait(&mute);
+            read++;
+            
+            if(read >0){
+                sem_wait(&wrtieLock);
             }
-            if(s.at(0 == 's')){
-                string num = s.substr(s.length()-3, s.length()-2);
-                
+
+            sem_post(&mute);
+            if(readQueue.empty){
+                pthread_exit(NULL);
             }
+            string s = readQueue.pop;
+            string num = s.substr(s.length()-3, s.length()-2);
+            Tree.searchNode(stoi(num));
+            read--;
+            sem_wait(&mute);
+
+            if(read == 0){
+                sem_post(&wrtieLock);
+            }
+            sem_post(&mute);
         }
 
-
+        pthread_exit(NULL);
 
 
 }
@@ -539,7 +561,7 @@ int main(int i){
         TreeBuild Tree;
         vector<string> commands;
         pthread_mutex_t m;
-        pthread_mutex_init(m, NULL);
+        //pthread_mutex_init(m, NULL);
         commands = parseInput("Hello.txt");
         for(int i = 0; i < commands.size(); i++){
             string instruction = commands[i];
