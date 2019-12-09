@@ -7,16 +7,19 @@
 #include <thread>
 #include <queue>
 #include <semaphore.h>
+#include <chrono> 
 //#include <bits/stdc++.h> 
 
 using namespace std;
+using namespace std::chrono;
 enum COLOR {Red, Black};
 const std::string WHITESPACE = " \n\r\t\f\v";
 queue <string> readQueue;
 queue<string> writeQueue;
 sem_t mute;
 sem_t wrtieLock;
-TreeBuild Tree;
+ofstream myfile;
+//TreeBuild Tree;
 
 //initializing the node struct
 struct Node
@@ -33,7 +36,8 @@ struct Node
         parent = NULL;
     }
 };
-
+Node *NIL;
+Node *root;
 class TreeBuild{    
     private:
         Node *root;
@@ -55,8 +59,11 @@ class TreeBuild{
         printf("made it\n");
         Node *curr = root;
         while (curr != NIL) {
+            //node is found
             if (curr->data == data) {
                 printf("true\n");
+                myfile << "true";
+                //myfile << this_thread;
                 return true;
 
             }
@@ -418,6 +425,25 @@ class TreeBuild{
 
 };
 
+void preOrderPrint(Node *n){
+    if(n == NIL){
+        myfile << ",f";
+    }
+    char col ='b';
+    if(n->color == Red){
+        col = 'r';
+    }
+    if(n!= root){
+        myfile << ",";
+    }
+    myfile << n->data << col;
+    preOrderPrint(n->left);
+    preOrderPrint(n->right);
+
+}
+
+TreeBuild Tree;
+
 //method to parse the input file
 vector<string> parseInput(string file){
     
@@ -470,6 +496,7 @@ vector<string> parseInput(string file){
         }
         else if(count == 2){
             while(std::getline(tokenstring, token, delimeter2)){
+                token.erase(remove(token.begin(), token.end(), ' '), token.end());
                 sepComma.push_back(token);
             }
         }
@@ -481,12 +508,100 @@ vector<string> parseInput(string file){
     // }
     return sepComma;
 }
+
+//method to get number out of command
+int getNum(string n){
+    int num = n.at(n.length()-3);
+    int num2 = n.at(n.length() -2);
+    //num.append(num2);
+    string s1 = to_string(num);
+    string s2 = to_string(num2);
+    string s = s1 + s2;
+    int c = stoi(s);
+    std::cout << c << "\n";
+    return c;
+
+}
+//method to run write process
+void *writeProcess(void *arg){
+    int write;
+    sem_init(&mute,0,1);
+    sem_init(&wrtieLock, 0,1);
+    while(!writeQueue.empty()){
+        printf("her\n");
+        sem_wait(&wrtieLock);
+        write++;
+        
+        if(write > 0 && !readQueue.empty()){
+            sem_wait(&mute);
+        }
+        sem_post(&wrtieLock);
+        if(writeQueue.empty()){
+            pthread_exit(NULL);
+        }
+        printf("HIm\n");
+        string p = writeQueue.front();
+        //string num = p.substr(p.length()-3, p.length()-2); 
+        if(p.at(p.length()- 10) == 'i'){
+            Tree.insertNode(getNum(p));
+        }
+        else{
+            Tree.deleteNode(getNum(p));
+        }
+        printf("sup\n");
+        writeQueue.pop();
+        write--;
+        sem_wait(&wrtieLock);
+
+        if(write == 0){
+            sem_post(&mute);
+        }            
+        sem_post(&wrtieLock);
+    }
+}
+
+//method to run read proccess
+void *concurrentThread(void *arg){
+        int read;
+        sem_init(&mute,0,1);
+        sem_init(&wrtieLock, 0,1);
+        while(!readQueue.empty()){
+            sem_wait(&mute);
+            read++;
+            //printf("like\n");
+            if(read >0){
+                sem_wait(&wrtieLock);
+            }
+
+            sem_post(&mute);
+            if(readQueue.empty()){
+                pthread_exit(NULL);
+            }
+            string s = readQueue.front();
+            //string num = s.substr(s.length()-3, s.length()-2);
+            printf("like\n");
+            Tree.searchNode(getNum(s));
+            readQueue.pop();
+            read--;
+            sem_wait(&mute);
+
+            if(read == 0){
+                sem_post(&wrtieLock);
+            }
+            sem_post(&mute);
+        }
+
+        pthread_exit(NULL);
+
+
+}
+
 //method to run the instructions and the threads
 void runInstruction(TreeBuild Tree, string s){
         std::cout << s << "\n";
         char num;
         char col;
-        pthread_t threads;
+        
         vector<string> threadandComs;
         std::string temp;
         char del = ',';
@@ -506,75 +621,57 @@ void runInstruction(TreeBuild Tree, string s){
             std::istringstream ss(s);
             if(s.at(s.length()-10)== 's'){
                 while(std::getline(ss, split, del)){
-                readQueue.push;
+                    if(split.at(split.length()-1 ==')')){
+                        //split.erase(remove(split.begin(), split.end(), ' '), split.end());
+                        readQueue.push(split);
+                    }
                 }
             }
             else{
                while(std::getline(ss, split, del)){
-                 writeQueue.push;
+                     if(split.at(split.length()-1 ==')')){
+                        //split.erase(remove(split.begin(), split.end(), ' '), split.end());
+                        writeQueue.push(split);                   
+                    }
                 } 
             }
 
             
         }
-            
-        for(int i = 0; i < readQueue.size(); i++){
-            //pthread_create(&threads[i], NULL, concurrentThread, Tree);
+        int i;
+        int j;
+        printf("yoyo\n");
+        pthread_t threads[readQueue.size() + writeQueue.size()];   
+        for(i = 0; i < readQueue.size(); i++){
+            pthread_create(&threads[i], NULL, concurrentThread, NULL);
+            printf("got here\n");
+        }
+        for(j = 0; j < writeQueue.size(); j++){
+            printf("hey\n");
+            pthread_create(&threads[i+j], NULL, writeProcess, NULL);
         }
 
 
 }
-//method to run read proccess
-void *concurrentThread(void *arg){
-        int read;
-        while(!readQueue.empty){
-            sem_wait(&mute);
-            read++;
-            
-            if(read >0){
-                sem_wait(&wrtieLock);
-            }
-
-            sem_post(&mute);
-            if(readQueue.empty){
-                pthread_exit(NULL);
-            }
-            string s = readQueue.pop;
-            string num = s.substr(s.length()-3, s.length()-2);
-            Tree.searchNode(stoi(num));
-            read--;
-            sem_wait(&mute);
-
-            if(read == 0){
-                sem_post(&wrtieLock);
-            }
-            sem_post(&mute);
-        }
-
-        pthread_exit(NULL);
-
-
-}
-
-
 int main(int i){
+        auto start = high_resolution_clock::now();
         TreeBuild Tree;
         vector<string> commands;
         pthread_mutex_t m;
+        ofstream myfile;
+        myfile.open("output.txt");
         //pthread_mutex_init(m, NULL);
         commands = parseInput("Hello.txt");
         for(int i = 0; i < commands.size(); i++){
             string instruction = commands[i];
             std::cout << instruction << "\n";
-            if(!(commands[i].find(',') != std::string::npos) || commands[i].at(commands[i].length() -1) == ')'){
-
-            }
-            else{
-                runInstruction(Tree, instruction);
-            }
-            
+            runInstruction(Tree, instruction);
+                        
         }   
         
-        
+        auto stop = high_resolution_clock::now(); 
+        auto duration = duration_cast<microseconds>(stop - start); 
+        //duration.count;
+        myfile << duration.count();
         return 0;
 }
